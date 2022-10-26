@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace ListViewMaui
 {
@@ -14,7 +9,7 @@ namespace ListViewMaui
         private string profileName;
         private string name;
         private string subject;
-        private string desc;
+        private string description;
         private DateTime date;
         private ImageSource image;
         private bool? isAttached;
@@ -54,7 +49,7 @@ namespace ListViewMaui
             set
             {
                 profileName = value;
-                OnPropertyChanged("Title");
+                OnPropertyChanged("ProfileName");
             }
         }
 
@@ -76,12 +71,12 @@ namespace ListViewMaui
         {
             get
             {
-                return desc;
+                return description;
             }
 
             set
             {
-                desc = value;
+                description = value;
                 OnPropertyChanged("Description");
             }
         }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 
 namespace ListViewMaui
 {
@@ -26,7 +20,7 @@ namespace ListViewMaui
 
         #endregion
 
-        #region GetEmployeeInfo
+        #region Get inbox info
 
         internal ObservableCollection<ListViewInboxInfo> GetInboxInfo()
         {
