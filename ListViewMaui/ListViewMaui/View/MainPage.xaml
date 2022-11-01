@@ -76,7 +76,7 @@
                         <ViewCell>
                             <ViewCell.View>
                                 <Grid HeightRequest="30">
-                                    <Label Text="{Binding Key}"
+                                    <Label Text="{Binding Key, Converter={StaticResource groupHeaderTextConverter}}"
                                            TextColor="#666666"
                                            Margin="14, 7, 0, 0"
                                            FontSize="12"

@@ -1,5 +1,4 @@
-﻿
-using Syncfusion.Maui.DataSource;
+﻿using Syncfusion.Maui.DataSource;
 using Syncfusion.Maui.DataSource.Extensions;
 using Syncfusion.Maui.ListView;
 using Syncfusion.Maui.ListView.Helpers;
