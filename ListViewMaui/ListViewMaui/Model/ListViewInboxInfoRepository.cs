@@ -7,8 +7,7 @@ namespace ListViewMaui
         #region Fields
 
         private Random random = new Random();
-        private int dayCount = 0;
-        private int monthCount = 0;
+
         #endregion
 
         #region Constructor
@@ -22,9 +21,9 @@ namespace ListViewMaui
 
         #region Get inbox info
 
-        internal ObservableCollection<ListViewInboxInfo> GetInboxInfo()
+        internal ObservableCollection<InboxInfo> GetInboxInfo()
         {
-            var empInfo = new ObservableCollection<ListViewInboxInfo>();
+            var empInfo = new ObservableCollection<InboxInfo>();
             int k = 0;
             for (int i = 0; i < Subject.Count(); i++)
             {
@@ -32,19 +31,18 @@ namespace ListViewMaui
                 {
                     k = 0;
                 }
-                var record = new ListViewInboxInfo()
+                var record = new InboxInfo()
                 {
                     ProfileName = ProfileList[i],
                     Name = NameList[i],
                     Subject = Subject[i],
-                    Date = GetDate(i),
+                    Date = dates[i],
                     Description = Descriptions[i],
                     Image = Images[k],
                     IsAttached = Attachments[i],
                     IsImportant = Importants[i],
-                    IsOpened = false,
+                    IsOpened = Opens[i],
                 };
-                record.IsFavorite = i < 7 && i % 2 == 0 ? true : false;
                 empInfo.Add(record);
                 k++;
             }
@@ -57,34 +55,40 @@ namespace ListViewMaui
 
         string[] ProfileList = new string[]
         {
-            "JL",
-            "FM",
-            "JR",
-            "NR",
-            "LC",
-            "BA",
-            "BK",
-            "LT",
-            "RS",
-            "XB",
-            "HS",
-            "BA",
+            "M",
+            "MV",
+            "MV",
+            "T",
+            "M",
+            "LI",
+            "M",
+            "M",
+            "SO",
+            "OT",
+            "MO",
+            "MA",
+            "BT",
+            "M",
+            "M",
         };
 
         string[] NameList = new string[]
         {
-            "Jenifer Larence",
-            "Frank Michael",
-            "Junior Richord",
-            "Nico Robin",
-            "Larry Caden",
-            "Barry Allen",
-            "Bill Kyle",
-            "Logan Texas",
-            "Rachiel San",
-            "Xaviour Brush",
-            "Holly Steve",
-            "Benjamin Alexander",
+            "Microsoft",
+            "Microsoft Viva",
+            "Microsoft Viva",
+            "Twitter",
+            "Microsoft",
+            "LinkedIn",
+            "Microsoft",
+            "Microsoft",
+            "Stack Overflow",
+            "Outlook Team",
+            "Microsoft Outlook",
+            "My Analytics",
+            "Blog Team Site",
+            "Microsoft",
+            "Microsoft",
         };
 
         string[] Images = new string[]
@@ -111,6 +115,9 @@ namespace ListViewMaui
             false,
             false,
             true,
+            false,
+            true,
+            false,
         };
 
         bool[] Importants = new bool[]
@@ -127,67 +134,86 @@ namespace ListViewMaui
             true,
             true,
             false,
+            true,
+            false,
+            false,
+        };
+
+        bool[] Opens = new bool[]
+        {
+            true,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
         };
 
         string[] Subject = new string[]
         {
-            "Happy birthday to an amazing employee!",
-            "Happy New Year!",
-            "Get well soon!!",
-            "Merry Christmas!",
-            "Happy Halloween!",
-            "Happy Thanksgiving!!",
-            "Happy St Patrick's Day!",
-            "Congratulations on the move!",
-            "Never doubt yourself. You’re always...",
-            "Warmest wishes...",
-            "Like a vintage auto, your value increases...",
-            "Happy Turkey Day!!",
+            "Dev Essentials: Learn about the future of .NET and celebrate Visual Studio's 25th anniversary",
+            "Your daily briefing",
+            "Your digest email",
+            "Be more recognizable",
+            "Dev Essentials: Announcing .NET Multiplatform App UI is generally available",
+            "You have two new messages",
+            "Start learning .NET MAUI and discover a new AI pair programmer",
+            "Dev Essentials: Learn how to code with Java",
+            "Your friendly, fear-free guide to getting started",
+            "Get to know what's new in Outlook",
+            "Microsoft Outlook test Message",
+            "My Analytics | Collaboration Edition",
+            "You've joined the Blog Team Site group",
+            "Microsoft .NET News: Get started with .NET 6.0 and watch sessions from .NET Conf 2022 on demand",
+            "Microsoft .NET News: Learn about new tools and updates for .NET developers",
         };
 
         string[] Descriptions = new string[] {
-            "Happy birthday to one of the best and most loyal employees ever!",
-            "May you be blessed with health, wealth, and happiness this new year.",
-            "Wishing you a speedy recovery. Get well soon!",
-            "Wishing you a happy Christmas. May your Christmas be filled with love, happiness, and prosperity.",
-            "Wishing you a night full of frights and a bag full of delights..",
-            "Wishing you hope, joy, peace, good health, favor, and love on this Thanksgiving Day!",
-            "May you find lots 'o' gold at the end of your rainbow this St. Patrick's Day!",
-            "Congratulations! May you find great happiness in your new home.",
-            "Never doubt yourself. You’re always the best! Just continue to be like that!",
-            "Happy wedding anniversary to you both. You are special.",
-            "Wishing you great achievements in this career, And I hope that you have a great day today!",
-            "Happy Turkey Day!. Don't forget to give thanks for being so blessed.",
+            "Developer news, updates, and training resources",
+            "Dear developer, It's almost the end if the week",
+            "Dear developer, discover trends in yout work habits",
+            "Stand out with a profile photo",
+            "On codebase, many platforms: .NET Multiplatform App UI is generally available",
+            "You have two new messages",
+            "Explore resources to get started with .NET MAUI",
+            "Get started: Java for beginners",
+            "How to learn and shart on Stack Overflow",
+            "Hello and welcome to Outlook",
+            "This is an email message sent automatically by Microsoft Outlook while testing settings of your account",
+            "Descover your habits. Work smarter.",
+            "Welcome to the Blog Team Site group",
+            "The Xamarin Newsletter is now .NET News",
+            "Now available: Visual Studio 2019 version 16.9",
         };
 
         #endregion
 
-        private DateTime GetDate(int i)
+        DateTime[] dates = new DateTime[]
         {
-            DateTime yesterday = DateTime.Now;
-
-            if (i < 2)
-            {
-                var time = DateTime.Now.AddMinutes(-i * 37);
-                return time;
-            }
-            else if (i < 4)
-            {
-                yesterday = DateTime.Now.AddDays(-1);
-                return yesterday;
-            }
-            else if (i < 8)
-            {
-                dayCount++;
-                var time = yesterday.AddDays(-dayCount);
-                return time;
-            }
-            else
-            {
-                monthCount++;
-                var time = DateTime.Now.AddDays(-monthCount * 15);
-                return time;
-            }
-        }
+            new DateTime(2022, 03, 25, 12, 00, 00),
+            new DateTime(2022, 10, 28, 08, 38, 00),
+            new DateTime(2022, 10, 28, 03, 10, 00),
+            new DateTime(2022, 10, 12, 12, 10, 00),
+            new DateTime(2022, 06, 25, 12, 10, 00),
+            new DateTime(2022, 10, 20, 10, 10, 00),
+            new DateTime(2022, 07, 20, 10, 10, 00),
+            new DateTime(2022, 05, 18, 12, 10, 00),
+            new DateTime(2022, 01, 25, 12, 10, 00),
+            new DateTime(2022, 01, 29, 12, 10, 00),
+            new DateTime(2022, 10, 28, 03, 25, 00),
+            new DateTime(2022, 08, 23, 12, 00, 00),
+            new DateTime(2022, 01, 04, 12, 00, 00),
+            new DateTime(2021, 11, 19, 12, 00, 00),
+            new DateTime(2021, 12, 12, 12, 00, 00),
+        };
     }
 }

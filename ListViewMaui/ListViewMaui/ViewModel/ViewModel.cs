@@ -1,28 +1,26 @@
-﻿using ListViewMaui;
-using System;
-using System.Collections.Generic;
+﻿using Syncfusion.Maui.DataSource;
+using Syncfusion.Maui.DataSource.Extensions;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 #nullable disable
 namespace ListViewMaui
 {
-    public class ListViewSwipingViewModel : INotifyPropertyChanged
+    public class ViewModel : INotifyPropertyChanged
     {
         #region Fields
 
-        private ObservableCollection<ListViewInboxInfo> inboxInfo;
-        private ObservableCollection<ListViewInboxInfo> archivedMessages;
+        private ObservableCollection<InboxInfo> inboxInfos;
+        private ObservableCollection<InboxInfo> archivedMessages;
         private Command undoCommand;
-        private Command deleteImageCommand;
+        private Command deleteCommand;
         private bool? isDeleted;
-        private ListViewInboxInfo listViewItem;
-        private int listViewItemIndex;
+        private InboxInfo listViewItem;
         private Command archiveCommand;
         private string popUpText;
+        private int listViewItemIndex;
+        public GroupResult itemGroup;
 
         #endregion
 
@@ -39,19 +37,9 @@ namespace ListViewMaui
 
         #endregion
 
-        #region EventHandler
-        public event EventHandler<ResetEventArgs> ResetSwipeView;
-
-        protected virtual void OnResetSwipe(ResetEventArgs e)
-        {
-            EventHandler<ResetEventArgs> handler = ResetSwipeView;
-            handler?.Invoke(this, e);
-        }
-        #endregion
-
         #region Constructor
 
-        public ListViewSwipingViewModel()
+        public ViewModel()
         {
             GenerateSource();
         }
@@ -60,21 +48,21 @@ namespace ListViewMaui
 
         #region Properties
 
-        public ObservableCollection<ListViewInboxInfo> InboxInfo
+        public ObservableCollection<InboxInfo> InboxInfos
         {
-            get { return inboxInfo; }
-            set { inboxInfo = value; OnPropertyChanged("InboxInfo"); }
+            get { return inboxInfos; }
+            set { inboxInfos = value; OnPropertyChanged("InboxInfos"); }
         }
 
-        public ObservableCollection<ListViewInboxInfo> ArchivedMessages
+        public ObservableCollection<InboxInfo> ArchivedMessages
         {
             get { return archivedMessages; }
             set { archivedMessages = value; OnPropertyChanged("ArchivedMessages"); }
         }
-        public Command DeleteImageCommand
+        public Command DeleteCommand
         {
-            get { return deleteImageCommand; }
-            protected set { deleteImageCommand = value; }
+            get { return deleteCommand; }
+            protected set { deleteCommand = value; }
         }
 
         public Command UndoCommand
@@ -110,53 +98,62 @@ namespace ListViewMaui
         {
             IsDeleted = false;
             ListViewInboxInfoRepository inboxinfo = new ListViewInboxInfoRepository();
-            archivedMessages = new ObservableCollection<ListViewInboxInfo>();
-            inboxInfo = inboxinfo.GetInboxInfo();
-            deleteImageCommand = new Command(Delete);
-            undoCommand = new Command(UndoAction);
-            archiveCommand = new Command(Archive);
+            archivedMessages = new ObservableCollection<InboxInfo>();
+            inboxInfos = inboxinfo.GetInboxInfo();
+            deleteCommand = new Command(OnDelete);
+            undoCommand = new Command(OnUndo);
+            archiveCommand = new Command(OnArchive);
         }
 
-        private async void Delete(object item)
+        private async void OnDelete(object item)
         {
             PopUpText = "Deleted";
-            listViewItem = (ListViewInboxInfo)item;
-            listViewItemIndex = inboxInfo!.IndexOf(listViewItem);
-            inboxInfo!.Remove(listViewItem);
+            listViewItem = (InboxInfo)item;
+            listViewItemIndex = inboxInfos.IndexOf(listViewItem);
+            inboxInfos!.Remove(listViewItem);
             IsDeleted = true;
+
+            // Added Delay in order to maintain the Delete message popUp at screen bottom.
             await Task.Delay(3000);
             IsDeleted = false;
         }
 
-        private async void Archive(object item)
+        private async void OnArchive(object item)
         {
             PopUpText = "Archived";
-            listViewItem = (ListViewInboxInfo)item;
-            listViewItemIndex = inboxInfo!.IndexOf(listViewItem);
-            inboxInfo!.Remove(listViewItem);
+            listViewItem = (InboxInfo)item;
+            listViewItemIndex = inboxInfos.IndexOf(listViewItem);
+            inboxInfos!.Remove(listViewItem);
             archivedMessages!.Add(listViewItem);
             IsDeleted = true;
+
+            // Added Delay in order to maintain the Archive message popUp at screen bottom.
             await Task.Delay(3000);
             IsDeleted = false;
         }
 
-        private void UndoAction()
+        private void OnUndo()
         {
             IsDeleted = false;
+
             if (listViewItem != null)
             {
-                inboxInfo!.Insert(listViewItemIndex, listViewItem);
+                inboxInfos!.Insert(listViewItemIndex, listViewItem);
+
+                var archivedItem = archivedMessages.Where(x => x.Name.Equals(listViewItem.Name));
+
+                if (archivedItem != null)
+                {
+                    foreach (var item in archivedItem)
+                    {
+                        archivedMessages.Remove(listViewItem);
+                        break;
+                    }
+                }
             }
+
             listViewItemIndex = 0;
             listViewItem = null;
-        }
-
-        #endregion
-
-        #region ResetEvent
-        public class ResetEventArgs : EventArgs
-        {
-
         }
         #endregion
     }

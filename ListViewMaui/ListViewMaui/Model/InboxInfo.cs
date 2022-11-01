@@ -2,7 +2,7 @@
 
 namespace ListViewMaui
 {
-    public class ListViewInboxInfo : INotifyPropertyChanged
+    public class InboxInfo : INotifyPropertyChanged
     {
         #region Fields
 
@@ -15,13 +15,12 @@ namespace ListViewMaui
         private bool? isAttached;
         private bool isOpened;
         private bool isImportant;
-        private bool isFavorite = true;
 
         #endregion
 
         #region Constructor
 
-        public ListViewInboxInfo()
+        public InboxInfo()
         {
 
         }
@@ -126,16 +125,6 @@ namespace ListViewMaui
             {
                 isImportant = value;
                 OnPropertyChanged("IsImportant");
-            }
-        }
-
-        public bool IsFavorite
-        {
-            get { return isFavorite; }
-            set
-            {
-                isFavorite = value;
-                OnPropertyChanged("IsFavorite");
             }
         }
 
