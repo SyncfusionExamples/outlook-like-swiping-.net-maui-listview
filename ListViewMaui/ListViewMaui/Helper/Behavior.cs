@@ -1,7 +1,10 @@
-﻿using Syncfusion.Maui.DataSource;
+﻿
+using Syncfusion.Maui.DataSource;
+using Syncfusion.Maui.DataSource.Extensions;
 using Syncfusion.Maui.ListView;
+using Syncfusion.Maui.ListView.Helpers;
 using System.ComponentModel;
-using static ListViewMaui.ListViewSwipingViewModel;
+using System.Reflection;
 
 #nullable disable
 namespace ListViewMaui
@@ -9,28 +12,33 @@ namespace ListViewMaui
     public class ListViewSwipingBehavior : Behavior<ContentPage>
     {
         private SfListView ListView;
-        private ListViewSwipingViewModel ViewModel;
+        private ViewModel ViewModel;
 
         protected override void OnAttachedTo(ContentPage bindable)
         {
-            ViewModel = new ListViewSwipingViewModel();
+            ViewModel = new ViewModel();
             bindable.BindingContext = ViewModel;
             ListView = bindable.FindByName<SfListView>("listView");
-            (bindable.BindingContext as ListViewSwipingViewModel).ResetSwipeView += ListViewSwipingBehavior_ResetSwipeView;
             ListView.PropertyChanged += ListView_PropertyChanged;
             ListView.ItemTapped += ListView_ItemTapped;
             ListView.QueryItemSize += ListView_QueryItemSize;
             ListView.SwipeEnded += ListView_SwipeEnded;
+            ListView.DataSource.SortDescriptors.Add(new SortDescriptor()
+            {
+                PropertyName = "Date",
+                Direction = Syncfusion.Maui.DataSource.ListSortDirection.Descending,
+            });
             ListView.DataSource.GroupDescriptors.Add(new GroupDescriptor()
             {
                 PropertyName = "Date",
                 KeySelector = (obj) =>
                 {
-                    var groupName = ((ListViewInboxInfo)obj).Date;
-
+                    var groupName = ((InboxInfo)obj).Date;
                     return GetKey(groupName);
-                }
+                },
+                Comparer = new CustomGroupComparer(),
             });
+            ListView.DataSource.LiveDataUpdateMode = LiveDataUpdateMode.AllowDataShaping;
             base.OnAttachedTo(bindable);
         }
         private void ListView_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -43,12 +51,7 @@ namespace ListViewMaui
 
         private void ListView_ItemTapped(object sender, Syncfusion.Maui.ListView.ItemTappedEventArgs e)
         {
-            (e.DataItem as ListViewInboxInfo).IsOpened = true;
-        }
-
-        private void ListViewSwipingBehavior_ResetSwipeView(object sender, ResetEventArgs e)
-        {
-            ListView!.ResetSwipeItem();
+            (e.DataItem as InboxInfo).IsOpened = true;
         }
 
         private async void ListView_SwipeEnded(object sender, Syncfusion.Maui.ListView.SwipeEndedEventArgs e)
@@ -60,16 +63,16 @@ namespace ListViewMaui
 
             if (e.Direction == SwipeDirection.Right)
             {
+                // Adding Delay in order to maintain the Swiping animaion before Archiving an Item.
                 await Task.Delay(400);
-                ViewModel.ArchiveCommand.Execute(null);
-                ViewModel.InboxInfo.Remove(e.DataItem as ListViewInboxInfo);
+                ViewModel.ArchiveCommand.Execute(e.DataItem);
             }
 
             if (e.Direction == SwipeDirection.Left)
             {
+                // Adding Delay in order to maintain the Swiping animaion before Deleting an Item.
                 await Task.Delay(400);
-                ViewModel.DeleteImageCommand.Execute(null);
-                ViewModel.InboxInfo.Remove(e.DataItem as ListViewInboxInfo);
+                ViewModel.DeleteCommand.Execute(e.DataItem);
             }
         }
 
@@ -77,14 +80,18 @@ namespace ListViewMaui
         {
             if (e.ItemType == ItemType.GroupHeader && e.ItemIndex == 0)
             {
-                e.ItemSize = 0;
-                e.Handled = true;
+                var groupName = e.DataItem as GroupResult;
+
+                if (groupName != null && (GroupName)groupName.Key == GroupName.Today)
+                {
+                    e.ItemSize = 0;
+                    e.Handled = true;
+                }
             }
         }
 
         protected override void OnDetachingFrom(ContentPage bindable)
         {
-            (bindable.BindingContext as ListViewSwipingViewModel).ResetSwipeView -= ListViewSwipingBehavior_ResetSwipeView;
             ListView.ItemTapped -= ListView_ItemTapped;
             ListView.PropertyChanged -= ListView_PropertyChanged;
             ListView.QueryItemSize -= ListView_QueryItemSize;
@@ -94,37 +101,37 @@ namespace ListViewMaui
             base.OnDetachingFrom(bindable);
         }
 
-        private string GetKey(DateTime groupName)
+        private GroupName GetKey(DateTime groupName)
         {
             int compare = groupName.Date.CompareTo(DateTime.Now.Date);
 
             if (compare == 0)
             {
-                return "Today";
+                return GroupName.Today;
             }
             else if (groupName.Date.CompareTo(DateTime.Now.AddDays(-1).Date) == 0)
             {
-                return "Yesterday";
-            }
-            else if (IsThisWeek(groupName))
-            {
-                return "This Week";
+                return GroupName.Yesterday;
             }
             else if (IsLastWeek(groupName))
             {
-                return "Last Week";
+                return GroupName.LastWeek;
+            }
+            else if (IsThisWeek(groupName))
+            {
+                return GroupName.ThisWeek;
             }
             else if (IsThisMonth(groupName))
             {
-                return "This Month";
+                return GroupName.ThisMonth;
             }
             else if (IsLastMonth(groupName))
             {
-                return "Last Month";
+                return GroupName.LastMonth;
             }
             else
             {
-                return "Older";
+                return GroupName.Older;
             }
         }
 
@@ -133,7 +140,12 @@ namespace ListViewMaui
             var groupWeekSunDay = groupName.AddDays(-(int)groupName.DayOfWeek).Day;
             var currentSunday = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek).Day;
 
-            return currentSunday == groupWeekSunDay;
+            var groupMonth = groupName.Month;
+            var currentMonth = DateTime.Today.Month;
+
+            var isCurrentYear = groupName.Year == DateTime.Today.Year;
+
+            return currentSunday == groupWeekSunDay && (groupMonth == currentMonth || groupMonth == currentMonth - 1) && isCurrentYear;
         }
 
         private bool IsLastWeek(DateTime groupName)
@@ -141,7 +153,12 @@ namespace ListViewMaui
             var groupWeekSunDay = groupName.AddDays(-(int)groupName.DayOfWeek).Day;
             var lastSunday = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek).Day - 7;
 
-            return lastSunday == groupWeekSunDay;
+            var groupMonth = groupName.Month;
+            var currentMonth = DateTime.Today.Month;
+
+            var isCurrentYear = groupName.Year == DateTime.Today.Year;
+
+            return lastSunday == groupWeekSunDay && (groupMonth == currentMonth || groupMonth == currentMonth -1) && isCurrentYear;
         }
 
         private bool IsThisMonth(DateTime groupName)
@@ -149,7 +166,9 @@ namespace ListViewMaui
             var groupMonth = groupName.Month;
             var currentMonth = DateTime.Today.Month;
 
-            return groupMonth == currentMonth;
+            var isCurrentYear = groupName.Year == DateTime.Today.Year;
+
+            return groupMonth == currentMonth && isCurrentYear;
         }
 
         private bool IsLastMonth(DateTime groupName)
@@ -157,7 +176,20 @@ namespace ListViewMaui
             var groupMonth = groupName.Month;
             var currentMonth = DateTime.Today.AddMonths(-1).Month;
 
-            return groupMonth == currentMonth;
+            var isCurrentYear = groupName.Year == DateTime.Today.Year;
+
+            return groupMonth == currentMonth && isCurrentYear ;
         }
+    }
+
+    public enum GroupName
+    {
+        Today = 0,
+        Yesterday,
+        ThisWeek,
+        LastWeek,
+        ThisMonth,
+        LastMonth,
+        Older
     }
 }

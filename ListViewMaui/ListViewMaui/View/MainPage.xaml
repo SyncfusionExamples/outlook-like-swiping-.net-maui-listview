@@ -8,6 +8,9 @@
 
     <ContentPage.Resources>
         <local:DatetimeToStringConverter x:Key="dateTimeConverter" />
+        <local:TextColorConverter x:Key="textColorConverter" />
+        <local:FontAttributeConverter x:Key="fontAttributeConverter" />
+        <local:GroupHeaderTextConverter x:Key="groupHeaderTextConverter" />
     </ContentPage.Resources>
 
     <ContentPage.Behaviors>
@@ -29,7 +32,7 @@
                    VerticalOptions="Center" />
             <ListView:SfListView Grid.Row="1"
                                  x:Name="listView"
-                                 ItemsSource="{Binding InboxInfo}"
+                                 ItemsSource="{Binding InboxInfos}"
                                  AllowSwiping="True"
                                  SwipeThreshold="100"
                                  ItemSize="70"
@@ -97,7 +100,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="72" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
                             <Grid Grid.Row="1"
@@ -128,6 +131,7 @@
                                    Text="{Binding Name}"
                                    FontFamily="Roboto-Medium"
                                    FontSize="14"
+                                   FontAttributes="{Binding IsOpened, Converter={StaticResource fontAttributeConverter}}"
                                    TextColor="#000000"
                                    Margin="0, 2, 0, 0"
                                    LineBreakMode="TailTruncation"
@@ -139,7 +143,8 @@
                                    Text="{Binding Subject}"
                                    FontFamily="Roboto-Medium"
                                    FontSize="13"
-                                   Margin="0,0,16,3"
+                                   FontAttributes="{Binding IsOpened, Converter={StaticResource fontAttributeConverter}}"
+                                   Margin="0,0,25,3"
                                    TextColor="#000000"
                                    LineBreakMode="TailTruncation"
                                    CharacterSpacing="0.25" />
@@ -158,13 +163,14 @@
                             <Label Grid.Row="1"
                                    Grid.Column="2"
                                    Text="{Binding Date, Converter={StaticResource dateTimeConverter}}"
-                                   TextColor="#666666"
+                                   TextColor="{Binding IsOpened, Converter={StaticResource textColorConverter}}"
                                    FontFamily="Roboto-Regular"
+                                   FontAttributes="{Binding IsOpened, Converter={StaticResource fontAttributeConverter}}"
                                    HorizontalOptions="End"
                                    HorizontalTextAlignment="End"
                                    FontSize="11"
                                    Margin="0,0,16,0"
-                                   CharacterSpacing="0.15" />
+                                   CharacterSpacing="0.20" />
 
                             <Image Grid.Row="2"
                                    Grid.Column="2"
@@ -223,7 +229,7 @@
                            Margin="0,0,16,0"
                            CharacterSpacing="0.25">
                         <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding UndoCommand}" />
+                            <TapGestureRecognizer Command="{Binding UndoCommand}"/>
                         </Label.GestureRecognizers>
                     </Label>
                 </Grid>
