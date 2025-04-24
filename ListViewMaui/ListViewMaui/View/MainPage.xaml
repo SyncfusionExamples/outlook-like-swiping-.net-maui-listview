@@ -45,7 +45,7 @@
                     <DataTemplate>
                         <Grid BackgroundColor="#D8F3D4">
                             <Label Text="&#xe71C;"
-                                   FontFamily='{OnPlatform Android=ListViewFontIcons.ttf#,UWP=ListViewFontIcons.ttf#ListViewFontIcons,MacCatalyst=ListViewFontIcons,iOS=ListViewFontIcons}'
+                                   FontFamily='{OnPlatform Android=ListViewFontIcons.ttf#,WinUI=ListViewFontIcons.ttf#ListViewFontIcons,MacCatalyst=ListViewFontIcons,iOS=ListViewFontIcons}'
                                    TextColor="Green"
                                    HorizontalOptions="Center"
                                    FontSize="22"
@@ -61,7 +61,7 @@
                         <Grid BackgroundColor="#F4DEDE"
                               x:Name="listViewGrid">
                             <Label Text="&#xe716;"
-                                   FontFamily='{OnPlatform Android=ListViewFontIcons.ttf#,UWP=ListViewFontIcons.ttf#ListViewFontIcons,MacCatalyst=ListViewFontIcons,iOS=ListViewFontIcons}'
+                                   FontFamily='{OnPlatform Android=ListViewFontIcons.ttf#,WinUI=ListViewFontIcons.ttf#ListViewFontIcons,MacCatalyst=ListViewFontIcons,iOS=ListViewFontIcons}'
                                    TextColor="DarkRed"
                                    HorizontalOptions="Center"
                                    FontSize="26"
